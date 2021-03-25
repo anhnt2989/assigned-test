@@ -4,7 +4,7 @@
  *
  */
 
-import React, { memo, Fragment, useState } from 'react';
+import React, { memo, Fragment, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 // import { FormattedMessage } from 'react-intl';
@@ -42,6 +42,11 @@ export function NestedFormAntd() {
   const [form] = Form.useForm();
 
   const [renderedForm, setRenderedForm] = useState(null);
+  const [panes, setPanes] = useState(MockData.initialPanes);
+  const [activeKey, setActiveKey] = useState(MockData.initialPanes[0].key);
+  const [currentTemplate, setCurrentTemplate] = useState({
+    1: { value: null },
+  });
 
   const layout = {
     labelCol: { span: 8 },
@@ -56,51 +61,114 @@ export function NestedFormAntd() {
     console.log(formData);
   };
 
-  const renderFormBySelectedTemplate = templateName => {
-    let renderedForm;
+  const renderFormBySelectedTemplate = (templateName, key) => {
+    let re_renderedForm = { ...renderedForm };
+    const newNestedTemplate = { ...currentTemplate };
     switch (templateName) {
       case 'basic':
-        renderedForm = (
+        re_renderedForm[key] = (
           <Fragment>
             <AntdFormInput
-              name="email"
+              name={['email', key]}
               label="E-mail"
               rules={[{ required: true }]}
+              hasFeedback
             >
               <Input />
             </AntdFormInput>
-            <AntdFormInput name="age" label="Age">
+            <AntdFormInput name={`age--${key}`} label="Age">
               <Input />
             </AntdFormInput>
-            <AntdFormInput name="gender" label="Gender">
+            <AntdFormInput name={`gender--${key}`} label="Gender">
               <Input />
             </AntdFormInput>
           </Fragment>
         );
         break;
       case 'advanced':
-        renderedForm = (
+        re_renderedForm[key] = (
           <Fragment>
-            <AntdFormInput name="id" label="ID" rules={[{ required: true }]}>
-              <Input />
-            </AntdFormInput>
             <AntdFormInput
-              name="username"
-              label="Username"
+              name={`id--${key}`}
+              label="ID"
               rules={[{ required: true }]}
+              hasFeedback
             >
               <Input />
             </AntdFormInput>
-            <AntdFormInput name="password" label="Password">
+            <AntdFormInput
+              name={`username--${key}`}
+              label="Username"
+              rules={[{ required: true }]}
+              hasFeedback
+            >
+              <Input />
+            </AntdFormInput>
+            <AntdFormInput name={`password--${key}`} label="Password">
               <Input />
             </AntdFormInput>
           </Fragment>
         );
         break;
       default:
-        renderedForm = <Fragment />;
+        re_renderedForm = <Fragment />;
     }
-    setRenderedForm(renderedForm);
+    newNestedTemplate[key] = { value: templateName };
+    setRenderedForm(re_renderedForm);
+    setCurrentTemplate(newNestedTemplate);
+  };
+
+  const onTemplateTabChange = activeKey => {
+    setActiveKey(activeKey);
+    const newNestedTemplate = { ...currentTemplate };
+    newNestedTemplate[activeKey] = { value: null };
+    setCurrentTemplate(newNestedTemplate);
+  };
+
+  const onTemplateTabEdit = (targetKey, action) => {
+    switch (action) {
+      case 'add':
+        addTab(targetKey);
+        break;
+      case 'remove':
+        removeTab(targetKey);
+        break;
+      default:
+    }
+  };
+
+  const addTab = () => {
+    const activeKey = `newTab${panes.length}`;
+    const newPanes = [...panes];
+    if (form.isFieldsTouched()) {
+      newPanes.push({
+        id: panes.length + 1,
+        title: `Template ${newPanes.length + 1}`,
+        key: activeKey,
+      });
+    }
+    setPanes(newPanes);
+    setActiveKey(activeKey);
+  };
+
+  const removeTab = targetKey => {
+    let newActiveKey = activeKey;
+    let lastIndex;
+    panes.forEach((pane, i) => {
+      if (pane.key === targetKey) {
+        lastIndex = i - 1;
+      }
+    });
+    const newPanes = panes.filter(pane => pane.key !== targetKey);
+    if (newPanes.length && newActiveKey === targetKey) {
+      if (lastIndex >= 0) {
+        newActiveKey = newPanes[lastIndex].key;
+      } else {
+        newActiveKey = newPanes[0].key;
+      }
+    }
+    setPanes(newPanes);
+    setActiveKey(newActiveKey);
   };
 
   return (
@@ -114,6 +182,7 @@ export function NestedFormAntd() {
               form={form}
               onFinish={onBasicFormSubmit}
               name="control-hooks"
+              validateTrigger={['onChange', 'onBlur']}
             >
               <Tabs defaultActiveKey="1">
                 <TabPane
@@ -129,6 +198,7 @@ export function NestedFormAntd() {
                     name="name"
                     label="Name"
                     rules={[{ required: true }]}
+                    hasFeedback
                   >
                     <Input />
                   </AntdFormInput>
@@ -136,6 +206,7 @@ export function NestedFormAntd() {
                     name="title"
                     label="Title"
                     rules={[{ required: true }]}
+                    hasFeedback
                   >
                     <Input />
                   </AntdFormInput>
@@ -149,28 +220,53 @@ export function NestedFormAntd() {
                   }
                   key="2"
                 >
-                  <Item
-                    name="template"
-                    label="Template"
-                    rules={[{ required: true }]}
+                  <Tabs
+                    type="editable-card"
+                    onChange={onTemplateTabChange}
+                    activeKey={activeKey}
+                    onEdit={onTemplateTabEdit}
                   >
-                    <Select
-                      onChange={renderFormBySelectedTemplate}
-                      allowClear
-                      placeholder="Choose your own template"
-                    >
-                      {!isEmpty(MockData.templateOpts) &&
-                        map(MockData.templateOpts, option => (
-                          <Option
-                            key={`template-option--${option.id}`}
-                            value={option.value}
+                    {panes.map(pane => (
+                      <TabPane
+                        tab={pane.title}
+                        key={pane.key}
+                        closable={pane.closable}
+                      >
+                        <Item
+                          name="template"
+                          label="Template"
+                          rules={[{ required: true }]}
+                        >
+                          <Select
+                            onChange={templateName =>
+                              renderFormBySelectedTemplate(
+                                templateName,
+                                pane.key,
+                              )
+                            }
+                            placeholder="Choose your own template"
+                            value={
+                              currentTemplate[`${pane.key}`]
+                                ? currentTemplate[`${pane.key}`].value
+                                : null
+                            }
                           >
-                            {option.label}
-                          </Option>
-                        ))}
-                    </Select>
-                  </Item>
-                  {renderedForm}
+                            {!isEmpty(MockData.templateOpts) &&
+                              map(MockData.templateOpts, option => (
+                                <Option
+                                  key={`template-option--${option.id}`}
+                                  value={option.value}
+                                  disabled={option.disabled || false}
+                                >
+                                  {option.label}
+                                </Option>
+                              ))}
+                          </Select>
+                        </Item>
+                        {renderedForm && renderedForm[pane.key]}
+                      </TabPane>
+                    ))}
+                  </Tabs>
                 </TabPane>
               </Tabs>
               <Item {...tailLayout}>
