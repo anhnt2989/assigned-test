@@ -41,7 +41,7 @@ export function NestedFormAntd() {
 
   const [form] = Form.useForm();
 
-  const [renderedForm,setRenderedForm] = useState(null);
+  const [renderedForm, setRenderedForm] = useState(null);
 
   const layout = {
     labelCol: { span: 8 },
@@ -69,16 +69,10 @@ export function NestedFormAntd() {
             >
               <Input />
             </AntdFormInput>
-            <AntdFormInput
-              name="age"
-              label="Age"
-            >
+            <AntdFormInput name="age" label="Age">
               <Input />
             </AntdFormInput>
-            <AntdFormInput
-              name="gender"
-              label="Gender"
-            >
+            <AntdFormInput name="gender" label="Gender">
               <Input />
             </AntdFormInput>
           </Fragment>
@@ -87,11 +81,7 @@ export function NestedFormAntd() {
       case 'advanced':
         renderedForm = (
           <Fragment>
-            <AntdFormInput
-              name="id"
-              label="ID"
-              rules={[{ required: true }]}
-            >
+            <AntdFormInput name="id" label="ID" rules={[{ required: true }]}>
               <Input />
             </AntdFormInput>
             <AntdFormInput
@@ -101,17 +91,14 @@ export function NestedFormAntd() {
             >
               <Input />
             </AntdFormInput>
-            <AntdFormInput
-              name="password"
-              label="Password"
-            >
+            <AntdFormInput name="password" label="Password">
               <Input />
             </AntdFormInput>
           </Fragment>
         );
         break;
       default:
-        renderedForm = (<Fragment />);
+        renderedForm = <Fragment />;
     }
     setRenderedForm(renderedForm);
   };
@@ -122,9 +109,22 @@ export function NestedFormAntd() {
         <Row>
           <Col xs={24} md={4} />
           <Col xs={24} md={16}>
-            <Form {...layout} form={form} onFinish={onBasicFormSubmit} name="control-hooks">
+            <Form
+              {...layout}
+              form={form}
+              onFinish={onBasicFormSubmit}
+              name="control-hooks"
+            >
               <Tabs defaultActiveKey="1">
-                <TabPane tab={<span><UserOutlined />Basic Information</span>} key="1">
+                <TabPane
+                  tab={
+                    <span>
+                      <UserOutlined />
+                      Basic Information
+                    </span>
+                  }
+                  key="1"
+                >
                   <AntdFormInput
                     name="name"
                     label="Name"
@@ -140,17 +140,43 @@ export function NestedFormAntd() {
                     <Input />
                   </AntdFormInput>
                 </TabPane>
-                <TabPane tab={<span><CopyOutlined />Templates</span>} key="2">
-                  <Item name="template" label="Template" rules={[{ required: true }]}>
-                    <Select onChange={renderFormBySelectedTemplate} allowClear placeholder="Choose your own template">
-                      {!isEmpty(MockData.templateOpts) && map(MockData.templateOpts, option => <Option key={`template-option--${option.id}`} value={option.value}>{option.label}</Option>)}
+                <TabPane
+                  tab={
+                    <span>
+                      <CopyOutlined />
+                      Templates
+                    </span>
+                  }
+                  key="2"
+                >
+                  <Item
+                    name="template"
+                    label="Template"
+                    rules={[{ required: true }]}
+                  >
+                    <Select
+                      onChange={renderFormBySelectedTemplate}
+                      allowClear
+                      placeholder="Choose your own template"
+                    >
+                      {!isEmpty(MockData.templateOpts) &&
+                        map(MockData.templateOpts, option => (
+                          <Option
+                            key={`template-option--${option.id}`}
+                            value={option.value}
+                          >
+                            {option.label}
+                          </Option>
+                        ))}
                     </Select>
                   </Item>
                   {renderedForm}
                 </TabPane>
               </Tabs>
               <Item {...tailLayout}>
-                <Button type="primary" htmlType="submit">Submit</Button>
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
               </Item>
             </Form>
           </Col>

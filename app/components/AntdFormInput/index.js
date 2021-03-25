@@ -20,9 +20,7 @@ function AntdFormInput(props) {
   const { children, ...rest } = props;
   return (
     <Wrapper>
-      <Item {...rest}>
-        {children}
-      </Item>
+      <Item {...rest}>{children}</Item>
     </Wrapper>
   );
 }

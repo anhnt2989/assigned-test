@@ -3,17 +3,17 @@ const MockData = {
     {
       id: 1,
       value: null,
-      label: 'None'
+      label: 'None',
     },
     {
       id: 2,
       value: 'basic',
-      label: 'Basic'
+      label: 'Basic',
     },
     {
       id: 3,
       value: 'advanced',
-      label: 'Advanced'
+      label: 'Advanced',
     },
   ],
 };

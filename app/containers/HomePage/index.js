@@ -24,23 +24,31 @@ export default function HomePage() {
         <Col xs={24} md={16}>
           <Tabs defaultActiveKey="1">
             <TabPane
-              tab={<span><FormOutlined />Form</span>}
+              tab={
+                <span>
+                  <FormOutlined />
+                  Form
+                </span>
+              }
               key="1"
             >
               <NestedFormAntd />
             </TabPane>
             <TabPane
-              tab={<span><DatabaseOutlined />Table</span>}
+              tab={
+                <span>
+                  <DatabaseOutlined />
+                  Table
+                </span>
+              }
               key="2"
             >
               <TableDataAntd />
             </TabPane>
           </Tabs>
-          
         </Col>
         <Col xs={24} md={4} />
       </Row>
-      
     </Fragment>
   );
 }

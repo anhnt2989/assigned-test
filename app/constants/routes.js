@@ -1,5 +1,3 @@
-const Routes = {
-
-};
+const Routes = {};
 
 export default Routes;
