@@ -61,6 +61,10 @@ export function NestedFormAntd() {
     console.log(formData);
   };
 
+  const onFinishFailed = errorInfo => {
+    console.log('Failed:', errorInfo);
+  };
+
   const renderFormBySelectedTemplate = (templateName, key) => {
     let re_renderedForm = { ...renderedForm };
     const newNestedTemplate = { ...currentTemplate };
@@ -71,7 +75,7 @@ export function NestedFormAntd() {
             <AntdFormInput
               name={['email', key]}
               label="E-mail"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Error' }]}
               hasFeedback
             >
               <Input />
@@ -91,7 +95,7 @@ export function NestedFormAntd() {
             <AntdFormInput
               name={`id--${key}`}
               label="ID"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Error' }]}
               hasFeedback
             >
               <Input />
@@ -99,7 +103,7 @@ export function NestedFormAntd() {
             <AntdFormInput
               name={`username--${key}`}
               label="Username"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Error' }]}
               hasFeedback
             >
               <Input />
@@ -147,6 +151,7 @@ export function NestedFormAntd() {
         key: activeKey,
       });
     }
+    form.submit();
     setPanes(newPanes);
     setActiveKey(activeKey);
   };
@@ -181,6 +186,7 @@ export function NestedFormAntd() {
               {...layout}
               form={form}
               onFinish={onBasicFormSubmit}
+              onFinishFailed={onFinishFailed}
               name="control-hooks"
               validateTrigger={['onChange', 'onBlur']}
             >
@@ -197,7 +203,7 @@ export function NestedFormAntd() {
                   <AntdFormInput
                     name="name"
                     label="Name"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: 'Error' }]}
                     hasFeedback
                   >
                     <Input />
@@ -205,7 +211,7 @@ export function NestedFormAntd() {
                   <AntdFormInput
                     name="title"
                     label="Title"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: 'Error' }]}
                     hasFeedback
                   >
                     <Input />
@@ -235,7 +241,7 @@ export function NestedFormAntd() {
                         <Item
                           name="template"
                           label="Template"
-                          rules={[{ required: true }]}
+                          rules={[{ required: true, message: 'Error' }]}
                         >
                           <Select
                             onChange={templateName =>
