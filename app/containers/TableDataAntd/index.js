@@ -196,7 +196,7 @@ export function TableDataAntd() {
         clonedData,
         product =>
           includes(product.name.toLowerCase(), filterText.toLowerCase()) ||
-          includes(product.type.toLowerCase(), filterText.toLowerCase),
+          includes(product.type.toLowerCase(), filterText.toLowerCase()),
       );
     } else {
       // reset filtered data
