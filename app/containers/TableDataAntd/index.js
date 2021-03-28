@@ -206,7 +206,11 @@ export function TableDataAntd() {
       <Row className="my-5 text-center">
         <Col xs={24}>
           <Button
-            onClick={() => setProductAdderStatus(true)}
+            onClick={() => {
+              setProductAdderStatus(true);
+              form.resetFields();
+              setEditingStatus(false);
+            }}
             shape="round"
             type="primary"
           >
