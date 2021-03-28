@@ -18,7 +18,8 @@ import Input from 'antd/lib/input';
 import Button from 'antd/lib/button';
 import Select from 'antd/lib/select';
 import { UserOutlined, CopyOutlined } from '@ant-design/icons';
-import { isEmpty, map } from 'lodash';
+import { isEmpty, map, last } from 'lodash';
+import { ToastContainer, toast } from 'react-toastify';
 
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
@@ -40,7 +41,13 @@ export function NestedFormAntd() {
   useInjectSaga({ key: 'nestedFormAntd', saga });
 
   const [form] = Form.useForm();
-
+  const toastConfigs = {
+    position: "top-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+  };
   const [renderedForm, setRenderedForm] = useState(null);
   const [panes, setPanes] = useState(MockData.initialPanes);
   const [activeKey, setActiveKey] = useState(MockData.initialPanes[0].key);
@@ -58,11 +65,13 @@ export function NestedFormAntd() {
   };
 
   const onBasicFormSubmit = formData => {
-    console.log(formData);
+    console.log('formData: >>>', formData);
+    toast.success('Successful!', toastConfigs);
   };
 
   const onFinishFailed = errorInfo => {
-    console.log('Failed:', errorInfo);
+    console.log('Failed: >>>', errorInfo);
+    toast.error('Please fill out all fields!', toastConfigs);
   };
 
   const renderFormBySelectedTemplate = (templateName, key) => {
@@ -73,7 +82,7 @@ export function NestedFormAntd() {
         re_renderedForm[key] = (
           <Fragment>
             <AntdFormInput
-              name={['email', key]}
+              name={`email--${key}`}
               label="E-mail"
               rules={[{ required: true, message: 'Error' }]}
               hasFeedback
@@ -141,19 +150,21 @@ export function NestedFormAntd() {
     }
   };
 
-  const addTab = () => {
+  const addTab = async () => {
     const activeKey = `newTab${panes.length}`;
     const newPanes = [...panes];
-    if (form.isFieldsTouched()) {
+    let result = await form.validateFields().then(values => result = values).catch(errorInfo => errorInfo);
+    if (form.isFieldsTouched() && isEmpty(result.errorFields)) {
       newPanes.push({
         id: panes.length + 1,
         title: `Template ${newPanes.length + 1}`,
         key: activeKey,
       });
+      form.resetFields([`template--${activeKey}`]);
     }
-    form.submit();
+    // form.submit();
     setPanes(newPanes);
-    setActiveKey(activeKey);
+    setActiveKey(newPanes.length > panes.length ? activeKey : last(panes).key);
   };
 
   const removeTab = targetKey => {
@@ -178,6 +189,7 @@ export function NestedFormAntd() {
 
   return (
     <div>
+      <ToastContainer />
       <Wrapper>
         <Row>
           <Col xs={24} md={4} />
@@ -239,7 +251,7 @@ export function NestedFormAntd() {
                         closable={pane.closable}
                       >
                         <Item
-                          name="template"
+                          name={`template--${pane.key}`}
                           label="Template"
                           rules={[{ required: true, message: 'Error' }]}
                         >
@@ -251,11 +263,6 @@ export function NestedFormAntd() {
                               )
                             }
                             placeholder="Choose your own template"
-                            value={
-                              currentTemplate[`${pane.key}`]
-                                ? currentTemplate[`${pane.key}`].value
-                                : null
-                            }
                           >
                             {!isEmpty(MockData.templateOpts) &&
                               map(MockData.templateOpts, option => (
