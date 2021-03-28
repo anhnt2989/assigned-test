@@ -22,7 +22,7 @@ import Select from 'antd/lib/select';
 import { SearchOutlined, EditTwoTone, DeleteTwoTone } from '@ant-design/icons';
 import ReactDragListView from 'react-drag-listview';
 import NumberFormat from 'react-number-format';
-import { filter, includes, isEmpty, maxBy, minBy, isEqual, remove } from 'lodash';
+import { filter, includes, isEmpty, maxBy, minBy, isEqual, remove, findIndex } from 'lodash';
 import { ToastContainer, toast } from 'react-toastify';
 import uuid from 'react-uuid';
 
@@ -138,12 +138,16 @@ export function TableDataAntd() {
     console.log(prices);
   };
   const onSubmit = formData => {
-    console.log('formData: >>>', formData);
     const clonedData = [...tableData];
-    clonedData.unshift({
-      id: uuid(),
-      ...formData,
-    });
+    if (isEditing) {
+      let foundProductIndex = findIndex(clonedData, { id: formData.id });
+      clonedData.splice(foundProductIndex, 1, {...formData});
+    } else {
+      clonedData.unshift({
+        id: uuid(),
+        ...formData,
+      });
+    }
     setTableData(clonedData);
     setProductAdderStatus(false);
     toast.success('You have added a product successfully!', toastConfigs);
@@ -165,9 +169,10 @@ export function TableDataAntd() {
 
   const handleEditProductDetails = product => {
     console.log(product);
-    const { name, price, origin, type } = product;
+    const { id, name, price, origin, type } = product;
     setEditingStatus(true);
     form.setFieldsValue({
+      id,
       name,
       price,
       origin,
@@ -286,6 +291,14 @@ export function TableDataAntd() {
         title={isEditing ? "Edit Product" : "Add new Product"}
       >
         <Form {...layout} form={form} onFinish={onSubmit} name="control-hooks">
+          <div className="d-none">
+            <AntdFormInput
+              name="id"
+              label="ID"
+            >
+              <Input />
+            </AntdFormInput>
+          </div>
           <AntdFormInput
             name="name"
             label="Name"
