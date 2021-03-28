@@ -20,7 +20,7 @@ import Modal from 'antd/lib/modal';
 import Form from 'antd/lib/form';
 import Select from 'antd/lib/select';
 import { SearchOutlined } from '@ant-design/icons';
-import ReactDragListView from "react-drag-listview";
+import ReactDragListView from 'react-drag-listview';
 import NumberFormat from 'react-number-format';
 import { filter, includes, isEmpty, maxBy, minBy, isEqual } from 'lodash';
 import { ToastContainer, toast } from 'react-toastify';
@@ -48,7 +48,9 @@ const columns = [
     title: 'Price',
     dataIndex: 'price',
     sorter: (a, b) => a.price - b.price,
-    render: value => <NumberFormat value={value} displayType="text" thousandSeparator />
+    render: value => (
+      <NumberFormat value={value} displayType="text" thousandSeparator />
+    ),
   },
   {
     title: 'Type',
@@ -63,18 +65,17 @@ const columns = [
     title: 'Actions',
     dataIndex: '',
     render: () => (
-      <div style={{display: 'flex'}}>
+      <div style={{ display: 'flex' }}>
         <button>Edit</button>
         <button>Delete</button>
       </div>
-    )
+    ),
   },
-
 ];
 
-//I was gonna create Draggable-Columns Table here
-//in real-proj, I used to separate it into defined component (with its own props) to re-use
-//table styling is specific too, should make it in inner styling
+// I was gonna create Draggable-Columns Table here
+// in real-proj, I used to separate it into defined component (with its own props) to re-use
+// table styling is specific too, should make it in inner styling
 function DraggableTable(props) {
   const { dataSource, columns } = props;
   const [innerColumns, setColumns] = useState(columns);
@@ -86,16 +87,18 @@ function DraggableTable(props) {
   };
 
   return (
-    <ReactDragListView.DragColumn
-        onDragEnd={onDragEnd}
-        nodeSelector="th"
-      >
-      <Table tableLayout="auto" bordered columns={innerColumns} dataSource={dataSource} />
+    <ReactDragListView.DragColumn onDragEnd={onDragEnd} nodeSelector="th">
+      <Table
+        tableLayout="auto"
+        bordered
+        columns={innerColumns}
+        dataSource={dataSource}
+      />
     </ReactDragListView.DragColumn>
   );
 }
 
-//please ignore fu**ing unique key warning, I could manage it but I did not have enough of time =))
+// please ignore fu**ing unique key warning, I could manage it but I did not have enough of time =))
 export function TableDataAntd() {
   useInjectReducer({ key: 'tableDataAntd', reducer });
   useInjectSaga({ key: 'tableDataAntd', saga });
@@ -109,7 +112,7 @@ export function TableDataAntd() {
   };
 
   const toastConfigs = {
-    position: "top-center",
+    position: 'top-center',
     autoClose: 5000,
     hideProgressBar: false,
     closeOnClick: true,
@@ -118,8 +121,12 @@ export function TableDataAntd() {
 
   const [tableData, setTableData] = useState(MockData.products);
   const [filterText, setFilterText] = useState('');
-  const [minPrice, ] = useState(minBy(MockData.products, product => product.price).price);
-  const [maxPrice, ] = useState(maxBy(MockData.products, product => product.price).price);
+  const [minPrice] = useState(
+    minBy(MockData.products, product => product.price).price,
+  );
+  const [maxPrice] = useState(
+    maxBy(MockData.products, product => product.price).price,
+  );
   const [isProductAdderOpened, setProductAdderStatus] = useState(false);
 
   const handleFilterChange = evt => {
@@ -130,10 +137,10 @@ export function TableDataAntd() {
   };
   const onSubmit = formData => {
     console.log('formData: >>>', formData);
-    let clonedData = [...tableData];
+    const clonedData = [...tableData];
     clonedData.unshift({
       id: uuid(),
-      ...formData
+      ...formData,
     });
     setTableData(clonedData);
     setProductAdderStatus(false);
@@ -142,24 +149,30 @@ export function TableDataAntd() {
 
   const handleFilterProductsbyPrice = prices => {
     console.log(prices);
-    let clonedData = [...tableData];
-    let filteredData = filter(clonedData, product => product.price <= prices[1] && product.price >= prices[0]);
+    const clonedData = [...tableData];
+    const filteredData = filter(
+      clonedData,
+      product => product.price <= prices[1] && product.price >= prices[0],
+    );
     setTableData(filteredData);
-    //reset filtered data
+    // reset filtered data
     if (isEqual(prices[0], minPrice) && isEqual(prices[1], maxPrice)) {
       setTableData(MockData.products);
     }
   };
 
   useEffect(() => {
-    let clonedData = [...tableData];
+    const clonedData = [...tableData];
     let filteredData = [];
     if (filterText && !isEmpty(filterText)) {
-      filteredData = filter(clonedData, product => {
-        return (includes(product.name.toLowerCase(), filterText.toLowerCase()) || includes(product.type.toLowerCase(), filterText.toLowerCase));
-      });
+      filteredData = filter(
+        clonedData,
+        product =>
+          includes(product.name.toLowerCase(), filterText.toLowerCase()) ||
+          includes(product.type.toLowerCase(), filterText.toLowerCase),
+      );
     } else {
-      //reset filtered data
+      // reset filtered data
       filteredData = MockData.products;
     }
     setTableData(filteredData);
@@ -170,26 +183,65 @@ export function TableDataAntd() {
       <ToastContainer />
       <Row className="my-5 text-center">
         <Col xs={24}>
-          <Button onClick={() => setProductAdderStatus(true)} shape="round" type="primary">Add new product</Button>
+          <Button
+            onClick={() => setProductAdderStatus(true)}
+            shape="round"
+            type="primary"
+          >
+            Add new product
+          </Button>
         </Col>
       </Row>
       <Row className="mt-5">
         <Col xs={24} md={12}>
-          <Input autoFocus placeholder="Search by name, type,..." onChange={handleFilterChange} value={filterText} prefix={<SearchOutlined />} allowClear />
+          <Input
+            autoFocus
+            placeholder="Search by name, type,..."
+            onChange={handleFilterChange}
+            value={filterText}
+            prefix={<SearchOutlined />}
+            allowClear
+          />
         </Col>
         <Col xs={24} md={12} className="px-5">
-          <Slider 
+          <Slider
             tooltipVisible
-            tipFormatter={text => <NumberFormat value={text} displayType="text" thousandSeparator suffix=" đ" />}
-            range 
+            tipFormatter={text => (
+              <NumberFormat
+                value={text}
+                displayType="text"
+                thousandSeparator
+                suffix=" đ"
+              />
+            )}
+            range
             marks={{
-              0: {label: <NumberFormat displayType="text" value={minPrice} thousandSeparator suffix=" đ" />},
-              7127123: {label: <NumberFormat style={{whiteSpace: 'nowrap'}} displayType="text" value={maxPrice} thousandSeparator suffix=" đ" />}
+              0: {
+                label: (
+                  <NumberFormat
+                    displayType="text"
+                    value={minPrice}
+                    thousandSeparator
+                    suffix=" đ"
+                  />
+                ),
+              },
+              7127123: {
+                label: (
+                  <NumberFormat
+                    style={{ whiteSpace: 'nowrap' }}
+                    displayType="text"
+                    value={maxPrice}
+                    thousandSeparator
+                    suffix=" đ"
+                  />
+                ),
+              },
             }}
-            max={maxPrice} 
-            min={minPrice} 
-            defaultValue={[minPrice, maxPrice]} 
-            onAfterChange={handleFilterProductsbyPrice} 
+            max={maxPrice}
+            min={minPrice}
+            defaultValue={[minPrice, maxPrice]}
+            onAfterChange={handleFilterProductsbyPrice}
             onChange={handlePriceSliderChange}
             draggableTrack
           />
@@ -207,14 +259,9 @@ export function TableDataAntd() {
         onOk={() => form.submit()}
         title="Add new Product"
       >
-        <Form
-          {...layout}
-          form={form}
-          onFinish={onSubmit}
-          name="control-hooks"
-        >
+        <Form {...layout} form={form} onFinish={onSubmit} name="control-hooks">
           <AntdFormInput
-            name='name'
+            name="name"
             label="Name"
             rules={[{ required: true, message: 'Error' }]}
             hasFeedback
@@ -222,7 +269,7 @@ export function TableDataAntd() {
             <Input />
           </AntdFormInput>
           <AntdFormInput
-            name='price'
+            name="price"
             label="Price"
             rules={[{ required: true, message: 'Error' }]}
             hasFeedback
@@ -231,10 +278,7 @@ export function TableDataAntd() {
           </AntdFormInput>
           <Row>
             <Col xs={24} md={12}>
-              <AntdFormInput
-                name="type"
-                label="Loại"
-              >
+              <AntdFormInput name="type" label="Loại">
                 <Select defaultValue="different">
                   <Option value="computer">Máy tính</Option>
                   <Option value="washing">Máy giặt</Option>
@@ -246,10 +290,7 @@ export function TableDataAntd() {
               </AntdFormInput>
             </Col>
             <Col xs={24} md={12}>
-            <AntdFormInput
-                name="origin"
-                label="Xuất xứ"
-              >
+              <AntdFormInput name="origin" label="Xuất xứ">
                 <Select defaultValue="DIFF">
                   <Option value="US">Mỹ</Option>
                   <Option value="JP">Nhật</Option>
@@ -261,7 +302,6 @@ export function TableDataAntd() {
               </AntdFormInput>
             </Col>
           </Row>
-          
         </Form>
       </Modal>
     </TableDataAntdWrapper>
