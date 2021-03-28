@@ -150,7 +150,7 @@ export function TableDataAntd() {
     }
     setTableData(clonedData);
     setProductAdderStatus(false);
-    toast.success('You have added a product successfully!', toastConfigs);
+    toast.success(`You have ${isEditing ? 'edited' : 'added'} a product successfully!`, toastConfigs);
   };
 
   const handleFilterProductsbyPrice = prices => {
