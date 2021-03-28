@@ -19,10 +19,10 @@ import Button from 'antd/lib/button';
 import Modal from 'antd/lib/modal';
 import Form from 'antd/lib/form';
 import Select from 'antd/lib/select';
-import { SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined, EditTwoTone, DeleteTwoTone } from '@ant-design/icons';
 import ReactDragListView from 'react-drag-listview';
 import NumberFormat from 'react-number-format';
-import { filter, includes, isEmpty, maxBy, minBy, isEqual } from 'lodash';
+import { filter, includes, isEmpty, maxBy, minBy, isEqual, remove } from 'lodash';
 import { ToastContainer, toast } from 'react-toastify';
 import uuid from 'react-uuid';
 
@@ -36,42 +36,7 @@ import makeSelectTableDataAntd from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 // import messages from './messages';
-import TableDataAntdWrapper from './TableDataAntdStyle';
-
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    sorter: (a, b) => a.name.localeCompare(b.name),
-  },
-  {
-    title: 'Price',
-    dataIndex: 'price',
-    sorter: (a, b) => a.price - b.price,
-    render: value => (
-      <NumberFormat value={value} displayType="text" thousandSeparator />
-    ),
-  },
-  {
-    title: 'Type',
-    dataIndex: 'type',
-  },
-  {
-    title: 'Origin',
-    dataIndex: 'origin',
-    sorter: (a, b) => a.origin.localeCompare(b.origin),
-  },
-  {
-    title: 'Actions',
-    dataIndex: '',
-    render: () => (
-      <div style={{ display: 'flex' }}>
-        <button>Edit</button>
-        <button>Delete</button>
-      </div>
-    ),
-  },
-];
+import TableDataAntdWrapper, { IconButton } from './TableDataAntdStyle';
 
 // I was gonna create Draggable-Columns Table here
 // in real-proj, I used to separate it into defined component (with its own props) to re-use
@@ -106,6 +71,41 @@ export function TableDataAntd() {
   const [form] = Form.useForm();
   const { Option } = Select;
 
+  const columns = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
+    },
+    {
+      title: 'Price',
+      dataIndex: 'price',
+      sorter: (a, b) => a.price - b.price,
+      render: value => (
+        <NumberFormat value={value} displayType="text" thousandSeparator />
+      ),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+    },
+    {
+      title: 'Origin',
+      dataIndex: 'origin',
+      sorter: (a, b) => a.origin.localeCompare(b.origin),
+    },
+    {
+      title: 'Actions',
+      dataIndex: '',
+      render: (row) => (
+        <div style={{ display: 'flex' }}>
+          <IconButton onClick={() => handleEditProductDetails(row)} className="table-btn__edit"><EditTwoTone twoToneColor="#3f51b5" style={{fontSize: 24}} /></IconButton>
+          <IconButton onClick={() => handleDeleteProduct(row)} className="table-btn__delete"><DeleteTwoTone twoToneColor="#f50057" style={{fontSize: 24}} /></IconButton>
+        </div>
+      ),
+    },
+  ];
+
   const layout = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
@@ -121,13 +121,15 @@ export function TableDataAntd() {
 
   const [tableData, setTableData] = useState(MockData.products);
   const [filterText, setFilterText] = useState('');
+  const [isProductAdderOpened, setProductAdderStatus] = useState(false);
+  const [isEditing, setEditingStatus] = useState(false);
   const [minPrice] = useState(
     minBy(MockData.products, product => product.price).price,
   );
   const [maxPrice] = useState(
     maxBy(MockData.products, product => product.price).price,
   );
-  const [isProductAdderOpened, setProductAdderStatus] = useState(false);
+  
 
   const handleFilterChange = evt => {
     setFilterText(evt.target.value);
@@ -159,6 +161,26 @@ export function TableDataAntd() {
     if (isEqual(prices[0], minPrice) && isEqual(prices[1], maxPrice)) {
       setTableData(MockData.products);
     }
+  };
+
+  const handleEditProductDetails = product => {
+    console.log(product);
+    const { name, price, origin, type } = product;
+    setEditingStatus(true);
+    form.setFieldsValue({
+      name,
+      price,
+      origin,
+      type
+    });
+    setProductAdderStatus(true);
+  };
+
+  const handleDeleteProduct = product => {
+    let clonedData = [...tableData];
+    remove(clonedData, _product => isEqual(_product.id, product.id));
+    setTableData(clonedData);
+    toast.success('You have deleted a product successfully!', toastConfigs);
   };
 
   useEffect(() => {
@@ -257,7 +279,7 @@ export function TableDataAntd() {
         visible={isProductAdderOpened}
         onCancel={() => setProductAdderStatus(false)}
         onOk={() => form.submit()}
-        title="Add new Product"
+        title={isEditing ? "Edit Product" : "Add new Product"}
       >
         <Form {...layout} form={form} onFinish={onSubmit} name="control-hooks">
           <AntdFormInput

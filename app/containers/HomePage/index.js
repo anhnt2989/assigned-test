@@ -25,27 +25,43 @@ export default function HomePage() {
           <Tabs defaultActiveKey="1">
             <TabPane
               tab={
-                <span>
-                  <FormOutlined />
-                  Form
-                </span>
+                <span>Ant Design Theme</span>  
               }
               key="1"
             >
-              <NestedFormAntd />
+              <Tabs defaultActiveKey="1-1">
+                <TabPane
+                  tab={
+                    <span>
+                      <FormOutlined />
+                      Form
+                    </span>
+                  }
+                  key="1-1"
+                >
+                  <NestedFormAntd />
+                </TabPane>
+                <TabPane
+                  tab={
+                    <span>
+                      <DatabaseOutlined />
+                      Table
+                    </span>
+                  }
+                  key="1-2"
+                >
+                  <TableDataAntd />
+                </TabPane>
+              </Tabs>
             </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  <DatabaseOutlined />
-                  Table
-                </span>
-              }
-              key="2"
-            >
-              <TableDataAntd />
+            <TabPane tab={<span>Material-UI Theme</span>} key="2">
+                Coming soon...
+            </TabPane>
+            <TabPane tab={<span>Reactstrap Theme</span>} key="3">
+              Coming soon...
             </TabPane>
           </Tabs>
+          
         </Col>
         <Col xs={24} md={4} />
       </Row>
